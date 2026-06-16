@@ -23,10 +23,13 @@ jobs:
       - name: Lint OpenAPI contract
         run: npm run lint:openapi
 
-      - name: Build Docker image
-        run: docker build -t fit4110/iot-ingestion:lab04 .
+      - name: Build IoT Docker image
+        run: docker build -f Dockerfile -t fit4110/iot-ingestion:lab04 .
 
-      - name: Run Docker container
+      - name: Build Analytics Docker image
+        run: docker build -f Dockerfile.analytics -t fit4110/analytics:lab04 .
+
+      - name: Run IoT Docker container
         run: |
           docker run -d --rm \
             --name fit4110-iot-lab04 \
@@ -34,19 +37,39 @@ jobs:
             --env-file .env.example \
             fit4110/iot-ingestion:lab04
 
-      - name: Wait for service health
-        run: npx wait-on http://localhost:8000/health --timeout 30000
+      - name: Run Analytics Docker container
+        run: |
+          docker run -d --rm \
+            --name fit4110-analytics-lab04 \
+            -p 8001:8001 \
+            --env-file .env.analytics.example \
+            fit4110/analytics:lab04
 
-      - name: Run Newman against Docker container
-        run: npm run test:local
+      - name: Wait for IoT service health
+        run: npx wait-on http://localhost:8000/health --timeout 60000 --interval 5000
 
-      - name: Show container logs on failure
+      - name: Wait for Analytics service health
+        run: npx wait-on http://localhost:8001/api/v1/health --timeout 60000 --interval 5000
+
+      - name: Run Newman tests for IoT
+        run: npm run test:local:iot
+
+      - name: Run Newman tests for Analytics
+        run: npm run test:local:analytics
+
+      - name: Show IoT container logs on failure
         if: failure()
         run: docker logs fit4110-iot-lab04 || true
 
-      - name: Stop container
+      - name: Show Analytics container logs on failure
+        if: failure()
+        run: docker logs fit4110-analytics-lab04 || true
+
+      - name: Stop containers
         if: always()
-        run: docker stop fit4110-iot-lab04 || true
+        run: |
+          docker stop fit4110-iot-lab04 || true
+          docker stop fit4110-analytics-lab04 || true
 
       - name: Upload Newman reports
         if: always()
