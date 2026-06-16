@@ -1,0 +1,497 @@
+openapi: 3.1.0
+info:
+  title: Analytics Service API
+  version: 0.4.0
+  description: |
+    Analytics Service for FIT4110 Lab 04 - Docker Packaging
+    
+    Service chịu trách nhiệm:
+      - Nhận sự kiện từ Camera, IoT, Access và Core Services
+      - Tổng hợp dữ liệu hệ thống Smart Campus
+      - Sinh báo cáo và thống kê
+
+servers:
+  - url: http://localhost:8001
+    description: Local Docker Container
+  - url: http://analytics:8001
+    description: Docker Compose Service
+
+tags:
+  - name: Health
+  - name: Events
+  - name: Reports
+  - name: Dashboard
+
+paths:
+
+  /api/v1/health:
+    get:
+      tags:
+        - Health
+      summary: Check service health
+      operationId: checkHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/v1/events/camera:
+    post:
+      tags:
+        - Events
+      summary: Receive camera event
+      operationId: receiveCameraEvent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CameraEvent'
+      responses:
+        '202':
+          description: Event accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventAcceptedResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /api/v1/events/iot:
+    post:
+      tags:
+        - Events
+      summary: Receive IoT event
+      operationId: receiveIoTEvent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IoTEvent'
+      responses:
+        '202':
+          description: Event accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventAcceptedResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /api/v1/events/access:
+    post:
+      tags:
+        - Events
+      summary: Receive access event
+      operationId: receiveAccessEvent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessEvent'
+      responses:
+        '202':
+          description: Event accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventAcceptedResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /api/v1/events/core:
+    post:
+      tags:
+        - Events
+      summary: Receive core service event
+      operationId: receiveCoreEvent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CoreEvent'
+      responses:
+        '202':
+          description: Event accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventAcceptedResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /api/v1/events:
+    get:
+      tags:
+        - Events
+      summary: List all events
+      operationId: listEvents
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: event_type
+          in: query
+          schema:
+            type: string
+          description: Filter by event type
+        - name: source_id
+          in: query
+          schema:
+            type: string
+          description: Filter by source ID
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Maximum number of events to return
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventListResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /api/v1/reports/summary:
+    get:
+      tags:
+        - Reports
+      summary: Get summary report
+      operationId: getSummaryReport
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Summary report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /api/v1/dashboard/metrics:
+    get:
+      tags:
+        - Dashboard
+      summary: Get dashboard metrics
+      operationId: getDashboardMetrics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardMetricsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - service
+        - version
+      properties:
+        status:
+          type: string
+          example: "OK"
+        service:
+          type: string
+          example: "analytics"
+        version:
+          type: string
+          example: "0.4.0"
+
+    ProblemDetails:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - detail
+      properties:
+        type:
+          type: string
+          example: "about:blank"
+        title:
+          type: string
+          example: "Unauthorized"
+        status:
+          type: integer
+          example: 401
+        detail:
+          type: string
+          example: "Missing Authorization header"
+        instance:
+          type: string
+          example: "/api/v1/events/camera"
+
+    CameraEvent:
+      type: object
+      required:
+        - camera_id
+        - event_type
+        - timestamp
+      properties:
+        camera_id:
+          type: string
+          minLength: 3
+          example: "CAM-A01"
+        event_type:
+          type: string
+          example: "motion_detected"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-05-13T08:30:00+07:00"
+        metadata:
+          type: object
+
+    IoTEvent:
+      type: object
+      required:
+        - device_id
+        - metric
+        - value
+        - timestamp
+      properties:
+        device_id:
+          type: string
+          minLength: 3
+          example: "ESP32-LAB-A01"
+        metric:
+          type: string
+          example: "temperature"
+        value:
+          type: number
+          example: 31.5
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-05-13T08:30:00+07:00"
+
+    AccessEvent:
+      type: object
+      required:
+        - access_id
+        - person_id
+        - action
+        - timestamp
+      properties:
+        access_id:
+          type: string
+          minLength: 3
+          example: "ACCESS-A01"
+        person_id:
+          type: string
+          example: "P001"
+        action:
+          type: string
+          enum:
+            - entry
+            - exit
+          example: "entry"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-05-13T08:30:00+07:00"
+
+    CoreEvent:
+      type: object
+      required:
+        - service_id
+        - event_name
+        - timestamp
+      properties:
+        service_id:
+          type: string
+          minLength: 3
+          example: "CORE-A01"
+        event_name:
+          type: string
+          example: "service_startup"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-05-13T08:30:00+07:00"
+        details:
+          type: object
+
+    EventAcceptedResponse:
+      type: object
+      required:
+        - event_id
+        - status
+      properties:
+        event_id:
+          type: string
+          example: "EVT-20260513-00001"
+        status:
+          type: string
+          example: "accepted"
+
+    EventRecord:
+      type: object
+      required:
+        - event_id
+        - event_type
+        - source_id
+        - timestamp
+        - received_at
+      properties:
+        event_id:
+          type: string
+          example: "EVT-20260513-00001"
+        event_type:
+          type: string
+          enum:
+            - camera
+            - iot
+            - access
+            - core
+        source_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        received_at:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+
+    EventListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventRecord'
+
+    ReportResponse:
+      type: object
+      required:
+        - report_id
+        - report_type
+        - period
+        - event_count
+        - generated_at
+      properties:
+        report_id:
+          type: string
+          example: "RPT-20260513-0001"
+        report_type:
+          type: string
+          example: "summary"
+        period:
+          type: string
+          example: "today"
+        event_count:
+          type: integer
+          example: 42
+        generated_at:
+          type: string
+          format: date-time
+
+    DashboardMetricsResponse:
+      type: object
+      required:
+        - total_events
+        - events_by_type
+        - last_updated
+      properties:
+        total_events:
+          type: integer
+          example: 125
+        events_by_type:
+          type: object
+          properties:
+            camera:
+              type: integer
+              example: 32
+            iot:
+              type: integer
+              example: 58
+            access:
+              type: integer
+              example: 28
+            core:
+              type: integer
+              example: 7
+        last_updated:
+          type: string
+          format: date-time

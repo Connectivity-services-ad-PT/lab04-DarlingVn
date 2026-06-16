@@ -5,9 +5,11 @@
   "private": true,
   "scripts": {
     "mock:iot": "prism mock contracts/iot-ingestion.openapi.yaml --host 0.0.0.0 --port 4010",
+    "mock:analytics": "prism mock contracts/analytics-openapi.yaml --host 0.0.0.0 --port 4011",
     "lint:openapi": "spectral lint contracts/*.yaml",
-    "test:mock": "newman run postman/collections/FIT4110_lab04_iot_docker.postman_collection.json -e postman/environments/FIT4110_lab04_mock.postman_environment.json -r cli,junit,htmlextra --reporter-junit-export reports/newman-lab04-mock.xml --reporter-htmlextra-export reports/newman-lab04-mock.html",
-    "test:local": "newman run postman/collections/FIT4110_lab04_iot_docker.postman_collection.json -e postman/environments/FIT4110_lab04_local.postman_environment.json -r cli,junit,htmlextra --reporter-junit-export reports/newman-lab04-local.xml --reporter-htmlextra-export reports/newman-lab04-local.html"
+    "test:mock:iot": "newman run postman/collections/FIT4110_lab04_iot_docker.postman_collection.json -e postman/environments/FIT4110_lab04_mock.postman_environment.json -r cli,junit,htmlextra --reporter-junit-export reports/newman-lab04-iot-mock.xml --reporter-htmlextra-export reports/newman-lab04-iot-mock.html",
+    "test:local:iot": "newman run postman/collections/FIT4110_lab04_iot_docker.postman_collection.json -e postman/environments/FIT4110_lab04_local.postman_environment.json -r cli,junit,htmlextra --reporter-junit-export reports/newman-lab04-iot-local.xml --reporter-htmlextra-export reports/newman-lab04-iot-local.html",
+    "test:local:analytics": "newman run postman/collections/FIT4110_lab04_analytics_docker.postman_collection.json -e postman/analytics-environments/FIT4110_lab04_analytics_local.postman_environment.json -r cli,junit,htmlextra --reporter-junit-export reports/newman-lab04-analytics-local.xml --reporter-htmlextra-export reports/newman-lab04-analytics-local.html"
   },
   "devDependencies": {
     "@stoplight/prism-cli": "^5.10.0",

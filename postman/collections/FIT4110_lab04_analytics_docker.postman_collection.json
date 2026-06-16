@@ -1,0 +1,406 @@
+{
+  "info": {
+    "_postman_id": "analytics-lab04-collection",
+    "name": "FIT4110 Lab 04 - Analytics Service",
+    "description": "Postman collection for testing Analytics Service Docker container",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Get Health Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains status field\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('status');",
+                  "});",
+                  "",
+                  "pm.test(\"Status value is OK\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.status).to.eql('OK');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events - Camera",
+      "item": [
+        {
+          "name": "POST Camera Event - Valid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 202\", function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains event_id\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('event_id');",
+                  "});",
+                  "",
+                  "pm.test(\"Status is accepted\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.status).to.eql('accepted');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"camera_id\": \"CAM-A01\", \"event_type\": \"motion_detected\", \"timestamp\": \"2026-05-13T08:30:00+07:00\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/events/camera",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "events", "camera"]
+            }
+          }
+        },
+        {
+          "name": "POST Camera Event - Missing Auth",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is ProblemDetails\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('status').to.equal(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"camera_id\": \"CAM-A01\", \"event_type\": \"motion_detected\", \"timestamp\": \"2026-05-13T08:30:00+07:00\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/events/camera",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "events", "camera"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events - IoT",
+      "item": [
+        {
+          "name": "POST IoT Event - Valid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 202\", function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains event_id\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('event_id');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"device_id\": \"ESP32-LAB-A01\", \"metric\": \"temperature\", \"value\": 31.5, \"timestamp\": \"2026-05-13T08:30:00+07:00\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/events/iot",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "events", "iot"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events - Access",
+      "item": [
+        {
+          "name": "POST Access Event - Valid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 202\", function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"access_id\": \"ACCESS-A01\", \"person_id\": \"P001\", \"action\": \"entry\", \"timestamp\": \"2026-05-13T08:30:00+07:00\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/events/access",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "events", "access"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events - Core",
+      "item": [
+        {
+          "name": "POST Core Event - Valid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 202\", function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"service_id\": \"CORE-A01\", \"event_name\": \"service_startup\", \"timestamp\": \"2026-05-13T08:30:00+07:00\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/events/core",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "events", "core"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Query & Reporting",
+      "item": [
+        {
+          "name": "GET List Events",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains items array\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('items').that.is.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/events?limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "events"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Summary Report",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains report fields\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('report_id');",
+                  "    pm.expect(json).to.have.property('event_count');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reports/summary",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "reports", "summary"]
+            }
+          }
+        },
+        {
+          "name": "GET Dashboard Metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains metrics\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('total_events');",
+                  "    pm.expect(json).to.have.property('events_by_type');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dashboard/metrics",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dashboard", "metrics"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8001",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "local-dev-token",
+      "type": "string"
+    }
+  ]
+}
